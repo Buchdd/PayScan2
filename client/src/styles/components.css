@@ -1,0 +1,342 @@
+/* Компоненты - кнопки, формы, карточки, бейджи */
+
+/* Sidebar */
+.sidebar {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar__label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.sidebar__link {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.sidebar__link:hover,
+.sidebar__link.is-active {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+/* User Chip */
+.user-chip {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.user-chip__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Cards */
+.card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 15px 50px rgba(15, 23, 42, 0.06);
+}
+
+.card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.card__eyebrow {
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.card__footer {
+  margin-top: 16px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.card--clickable {
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card--clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+}
+
+/* Wallet Cards */
+.wallet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.wallet-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.wallet-card__label {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.wallet-card__amount {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 8px 0;
+}
+
+.wallet-card__id {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* Badges */
+.badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.badge--outline {
+  border: 1px solid #0f172a;
+  background: transparent;
+  color: #0f172a;
+}
+
+/* Buttons */
+.primary-button,
+.ghost-button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primary-button {
+  background: #2563eb;
+  color: #fff;
+}
+
+.primary-button.ghost {
+  background: #0f172a;
+}
+
+.ghost-button {
+  background: transparent;
+  border: 1px solid #cbd5f5;
+  color: #0f172a;
+}
+
+.button {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 500;
+  font-family: inherit;
+  background: #f1f5f9;
+  color: #0f172a;
+  transition: background 0.2s ease;
+}
+
+.button:hover {
+  background: #e2e8f0;
+}
+
+.button--small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.action-button {
+  padding: 14px 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.action-button:hover:not(:disabled) {
+  border-color: #2563eb;
+  background: #eff6ff;
+  transform: translateY(-2px);
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Forms */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  border-radius: 12px;
+  border: 1px solid #cbd5f5;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-field textarea {
+  min-height: 90px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.form-result {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #e0f2fe;
+  color: #075985;
+  font-size: 14px;
+}
+
+.form-result--success {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.form-result--error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: inset 0 0 0 1px #f1f5f9;
+}
+
+.stat-card h3 {
+  font-size: 42px;
+  margin: 8px 0;
+}
+
+/* Meta */
+.meta {
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* Service List */
+.service-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.service-item {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.service-item:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.service-item.is-active {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.service-item strong {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.service-item span {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Адаптивность для компонентов */
+@media (max-width: 960px) {
+  .sidebar {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+}
+
