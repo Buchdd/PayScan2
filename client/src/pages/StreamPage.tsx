@@ -5,13 +5,16 @@ import TransferOperation from '../operations/TransferOperation';
 import QrPaymentOperation from '../operations/QrPaymentOperation';
 import DepositOperation from '../operations/DepositOperation';
 import HistoryOperation from '../operations/HistoryOperation';
+import BankDetailsOperation from '../operations/BankDetailsOperation'; // <-- Добавить этот импорт
+import { formatWithConversion, getCurrencySymbol } from '../utils/currencyConverter';
 
 interface StreamPageProps {
   stream: Stream;
   onCreateTransfer: (payload: TransferPayload) => Promise<string>;
 }
 
-type OperationType = 'transfer' | 'qr' | 'deposit' | 'history' | null;
+// Добавляем 'bank-details' в тип операций
+type OperationType = 'transfer' | 'qr' | 'deposit' | 'history' | 'bank-details' | null;
 
 const StreamPage = ({ stream, onCreateTransfer }: StreamPageProps) => {
   const [activeTenantId, setActiveTenantId] = useState<string | null>(null);
@@ -66,80 +69,120 @@ const StreamPage = ({ stream, onCreateTransfer }: StreamPageProps) => {
             </div>
 
             <div className="tenant-card__content">
-                <div className="tenant-wallets">
-                  <h4>Кошельки:</h4>
-                  <div className="wallet-grid">
-                    {tenant.wallets.map((wallet) => (
+              <div className="tenant-wallets">
+                <h4>Кошельки:</h4>
+                <div className="wallet-grid">
+                  {tenant.wallets.map((wallet) => {
+                    const formatted = formatWithConversion(wallet.balance, wallet.currency);
+                    const currencySymbol = getCurrencySymbol(wallet.currency);
+                    
+                    return (
                       <div key={wallet.id} className="wallet-card">
-                        <p className="wallet-card__label">
-                          {wallet.currency} кошелёк
-                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '18px' }}>{currencySymbol}</span>
+                          <p className="wallet-card__label">
+                            {wallet.currency} кошелёк
+                            {formatted.isForeign && (
+                              <span style={{
+                                fontSize: '10px',
+                                marginLeft: '6px',
+                                padding: '1px 4px',
+                                backgroundColor: '#e2e8f0',
+                                borderRadius: '3px',
+                                color: '#64748b',
+                              }}>
+                                ИНО
+                              </span>
+                            )}
+                          </p>
+                        </div>
                         <p className="wallet-card__amount">
-                          {wallet.balance.toLocaleString('ru-RU', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}{' '}
-                          {wallet.currency}
+                          {formatted.primary}
                         </p>
+                        {formatted.secondary && (
+                          <p style={{
+                            fontSize: '12px',
+                            color: '#64748b',
+                            margin: '2px 0',
+                            fontStyle: 'italic',
+                          }}>
+                            {formatted.secondary}
+                          </p>
+                        )}
                         <p className="wallet-card__id">{wallet.id}</p>
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
-
-                <div className="tenant-actions">
-                  <h4>Операции:</h4>
-                  <div className="actions-grid">
-                    <button
-                      className="action-button"
-                      onClick={() => handleOperationClick(tenant.id, 'transfer')}
-                    >
-                      💸 Перевод между кошельками
-                    </button>
-                    <button
-                      className="action-button"
-                      onClick={() => handleOperationClick(tenant.id, 'deposit')}
-                    >
-                      💳 Пополнение счёта
-                    </button>
-                    <button
-                      className="action-button"
-                      onClick={() => handleOperationClick(tenant.id, 'qr')}
-                    >
-                      📱 QR-оплата
-                    </button>
-                    <button
-                      className="action-button"
-                      onClick={() => handleOperationClick(tenant.id, 'history')}
-                    >
-                      📊 История операций
-                    </button>
-                  </div>
-                </div>
-
-                {activeTenantId === tenant.id && activeOperation === 'transfer' && (
-                  <TransferOperation
-                    allWallets={allWallets}
-                    onCreateTransfer={onCreateTransfer}
-                    onClose={handleCloseOperation}
-                  />
-                )}
-
-                {activeTenantId === tenant.id && activeOperation === 'qr' && (
-                  <QrPaymentOperation
-                    tenantWallets={tenant.wallets}
-                    onClose={handleCloseOperation}
-                  />
-                )}
-
-                {activeTenantId === tenant.id && activeOperation === 'deposit' && (
-                  <DepositOperation onClose={handleCloseOperation} />
-                )}
-
-                {activeTenantId === tenant.id && activeOperation === 'history' && (
-                  <HistoryOperation onClose={handleCloseOperation} />
-                )}
               </div>
+
+              <div className="tenant-actions">
+                <h4>Операции:</h4>
+                <div className="actions-grid">
+                  <button
+                    className="action-button"
+                    onClick={() => handleOperationClick(tenant.id, 'transfer')}
+                  >
+                    💸 Перевод между кошельками
+                  </button>
+                  <button
+                    className="action-button"
+                    onClick={() => handleOperationClick(tenant.id, 'deposit')}
+                  >
+                    💳 Быстрое пополнение
+                  </button>
+                  <button
+                    className="action-button"
+                    onClick={() => handleOperationClick(tenant.id, 'bank-details')}
+                  >
+                    🏦 Пополнение по реквизитам
+                  </button>
+                  <button
+                    className="action-button"
+                    onClick={() => handleOperationClick(tenant.id, 'qr')}
+                  >
+                    📱 QR-оплата
+                  </button>
+                  <button
+                    className="action-button"
+                    onClick={() => handleOperationClick(tenant.id, 'history')}
+                  >
+                    📊 История операций
+                  </button>
+                </div>
+              </div>
+
+              {activeTenantId === tenant.id && activeOperation === 'transfer' && (
+                <TransferOperation
+                  allWallets={allWallets}
+                  onCreateTransfer={onCreateTransfer}
+                  onClose={handleCloseOperation}
+                />
+              )}
+
+              {activeTenantId === tenant.id && activeOperation === 'qr' && (
+                <QrPaymentOperation
+                  tenantWallets={tenant.wallets}
+                  onClose={handleCloseOperation}
+                />
+              )}
+
+              {activeTenantId === tenant.id && activeOperation === 'deposit' && (
+                <DepositOperation onClose={handleCloseOperation} />
+              )}
+
+              {activeTenantId === tenant.id && activeOperation === 'history' && (
+                <HistoryOperation onClose={handleCloseOperation} />
+              )}
+
+              {/* Добавляем новую операцию */}
+              {activeTenantId === tenant.id && activeOperation === 'bank-details' && (
+                <BankDetailsOperation
+                  tenantWallets={tenant.wallets}
+                  onClose={handleCloseOperation}
+                />
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -148,5 +191,3 @@ const StreamPage = ({ stream, onCreateTransfer }: StreamPageProps) => {
 };
 
 export default StreamPage;
-
-

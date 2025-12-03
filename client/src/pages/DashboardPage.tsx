@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { Stream, Wallet } from '../types';
+import UserProfile, { type UserProfileData } from '../components/UserProfile';
+import { formatWithConversion, getCurrencySymbol } from '../utils/currencyConverter';
 import '../styles/pages/dashboard.css';
 
 interface DashboardPageProps {
@@ -9,8 +11,22 @@ interface DashboardPageProps {
 interface WalletWithContext extends Wallet {
   streamId: string;
   streamLabel: string;
-  tenantTitle: string;
+  tenantTitle: string; 
 }
+
+// Пример данных пользователя
+const mockUserData: UserProfileData = {
+  fullName: 'Иванов Иван Иванович',
+  phone: '+7 (999) 123-45-67',
+  email: 'ivan.ivanov@example.com',
+  passportData: {
+    series: '45 01',
+    number: '123456',
+    issuedBy: 'ОУФМС России по г. Москве',
+    issueDate: '12.05.2018',
+  },
+  verificationStatus: 'verified',
+};
 
 const DashboardPage = ({ streams }: DashboardPageProps) => {
   // Собираем все кошельки со всех стримов
@@ -24,6 +40,14 @@ const DashboardPage = ({ streams }: DashboardPageProps) => {
       })),
     ),
   );
+
+  const handleVerificationRequest = () => {
+    console.log('Запрос на верификацию отправлен');
+  };
+
+  const handleEditProfile = () => {
+    console.log('Редактирование профиля');
+  };
 
   return (
     <section className="page">
@@ -40,6 +64,14 @@ const DashboardPage = ({ streams }: DashboardPageProps) => {
         </div>
       </div>
 
+      {/* Профиль пользователя с возможностью сворачивания */}
+      <UserProfile
+        user={mockUserData}
+        onVerificationRequest={handleVerificationRequest}
+        onEditProfile={handleEditProfile}
+        defaultCollapsed={true}
+      />
+
       <div className="wallets-overview">
         {allWallets.length === 0 ? (
           <div className="card">
@@ -47,31 +79,60 @@ const DashboardPage = ({ streams }: DashboardPageProps) => {
           </div>
         ) : (
           <div className="wallet-list">
-            {allWallets.map((wallet) => (
-              <Link
-                key={wallet.id}
-                to={`/streams/${wallet.streamId}`}
-                className="wallet-item"
-              >
-                <div className="wallet-item__info">
-                  <div className="wallet-item__header">
-                    <h3>{wallet.currency} кошелёк</h3>
-                    <span className="badge badge--outline">{wallet.streamLabel}</span>
+            {allWallets.map((wallet) => {
+              const formatted = formatWithConversion(wallet.balance, wallet.currency);
+              const currencySymbol = getCurrencySymbol(wallet.currency);
+              
+              return (
+                <Link
+                  key={wallet.id}
+                  to={`/streams/${wallet.streamId}`}
+                  className="wallet-item"
+                >
+                  <div className="wallet-item__info">
+                    <div className="wallet-item__header">
+                      <h3>
+                        <span style={{ marginRight: '8px' }}>{currencySymbol}</span>
+                        {wallet.currency} кошелёк
+                        {formatted.isForeign && (
+                          <span style={{
+                            fontSize: '12px',
+                            marginLeft: '8px',
+                            padding: '2px 6px',
+                            backgroundColor: '#e2e8f0',
+                            borderRadius: '4px',
+                            color: '#64748b',
+                          }}>
+                            Иностранный
+                          </span>
+                        )}
+                      </h3>
+                      <span className="badge badge--outline">{wallet.streamLabel}</span>
+                    </div>
+                    <p className="wallet-item__tenant">{wallet.tenantTitle}</p>
+                    <p className="wallet-item__id">ID: {wallet.id}</p>
                   </div>
-                  <p className="wallet-item__tenant">{wallet.tenantTitle}</p>
-                  <p className="wallet-item__id">ID: {wallet.id}</p>
-                </div>
-                <div className="wallet-item__balance">
-                  <p className="wallet-item__amount">
-                    {wallet.balance.toLocaleString('ru-RU', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
-                  <p className="wallet-item__currency">{wallet.currency}</p>
-                </div>
-              </Link>
-            ))}
+                  <div className="wallet-item__balance">
+                    <p className="wallet-item__amount">
+                      {formatted.primary}
+                    </p>
+                    {formatted.secondary && (
+                      <p className="wallet-item__conversion" style={{
+                        fontSize: '14px',
+                        color: '#64748b',
+                        margin: '4px 0',
+                        fontStyle: 'italic',
+                      }}>
+                        {formatted.secondary}
+                      </p>
+                    )}
+                    <p className="wallet-item__currency">
+                      Баланс в {wallet.currency}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
@@ -114,5 +175,3 @@ const DashboardPage = ({ streams }: DashboardPageProps) => {
 };
 
 export default DashboardPage;
-
-
