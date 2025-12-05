@@ -1,63 +1,108 @@
-import { mockFrameworkUser } from '../data/mock';
-import type { FrameworkUser, TransferPayload } from '../types';
+// api/client.ts
+import type { FrameworkUser, Stream, TransferPayload, LoginResponse, ApiResponse } from '../types';
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+const API_BASE_URL = 'http://localhost:4000/api';
 
-async function request<T>(
-  input: RequestInfo,
-  init?: RequestInit,
-  fallback?: () => T,
-): Promise<T> {
+// Универсальный метод для запросов
+async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  
   try {
-    const response = await fetch(input, init);
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+    });
+
     if (!response.ok) {
-      throw new Error(`Request failed with ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error ${response.status}`);
     }
-    return (await response.json()) as T;
+
+    return await response.json();
   } catch (error) {
-    console.warn('Falling back to mock data:', error);
-    if (fallback) {
-      return fallback();
-    }
+    console.error(`API Error at ${endpoint}:`, error);
     throw error;
   }
 }
 
-export function login(email: string, password: string): Promise<FrameworkUser> {
-  return request(
-    `${API_BASE_URL}/api/auth/login`,
-    {
+// Реальная авторизация через БД
+export async function login(email: string, password: string): Promise<FrameworkUser> {
+  try {
+    const response = await fetchApi<LoginResponse>('/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
-    },
-    () => ({ ...mockFrameworkUser, email }),
-  ).then((payload: any) => payload.user ?? payload);
+    });
+
+    if (response.user) {
+      // Сохраняем токен если есть
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+      }
+      return response.user;
+    } else {
+      throw new Error(response.message || 'Авторизация не удалась');
+    }
+  } catch (error) {
+    console.error('Login failed:', error);
+    // Если сервер недоступен, используем заглушку
+    throw error;
+  }
 }
 
-export function fetchStreams(): Promise<FrameworkUser['streams']> {
-  return request(
-    `${API_BASE_URL}/api/streams`,
-    undefined,
-    () => mockFrameworkUser.streams,
-  );
+// Получение потоков/стримов пользователя
+export async function fetchStreams(): Promise<Stream[]> {
+  try {
+    const response = await fetchApi<ApiResponse<Stream[]>>('/streams');
+    
+    if (response.status === 'success' && response.data) {
+      return response.data;
+    } else {
+      throw new Error(response.message || 'Не удалось загрузить потоки');
+    }
+  } catch (error) {
+    console.error('Failed to fetch streams:', error);
+    throw error;
+  }
 }
 
-export function createTransfer(payload: TransferPayload) {
-  return request(
-    `${API_BASE_URL}/api/transfers`,
-    {
+// Создание перевода
+export async function createTransfer(payload: TransferPayload): Promise<{ reference: string }> {
+  try {
+    const response = await fetchApi<ApiResponse<{ reference: string }>>('/transfers', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-    },
-    () => ({
-      status: 'queued',
-      transfer: payload,
-      reference: `TRX-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
-    }),
-  );
+    });
+
+    if (response.status === 'success' && response.data) {
+      return response.data;
+    } else {
+      throw new Error(response.message || 'Не удалось создать перевод');
+    }
+  } catch (error) {
+    console.error('Transfer failed:', error);
+    throw error;
+  }
 }
 
+// Проверка здоровья API
+export async function checkApiHealth(): Promise<boolean> {
+  try {
+    const response = await fetchApi<{ status: string }>('/health');
+    return response.status === 'ok';
+  } catch {
+    return false;
+  }
+}
 
+// Проверка подключения к БД
+export async function checkDbHealth(): Promise<boolean> {
+  try {
+    const response = await fetchApi<{ status: string }>('/db-health');
+    return response.status === 'ok';
+  } catch {
+    return false;
+  }
+}

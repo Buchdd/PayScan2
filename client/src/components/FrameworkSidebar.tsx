@@ -1,3 +1,4 @@
+// FrameworkSidebar.tsx
 import { Link, useLocation } from 'react-router-dom';
 import type { Stream } from '../types';
 
@@ -41,5 +42,3 @@ const FrameworkSidebar = ({ streams }: FrameworkSidebarProps) => {
 };
 
 export default FrameworkSidebar;
-
-

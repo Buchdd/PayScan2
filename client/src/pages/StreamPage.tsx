@@ -1,3 +1,4 @@
+// StreamPage.tsx - исправляем использование wallet.currency
 import { useState } from 'react';
 import type { Stream, TransferPayload } from '../types';
 import '../styles/pages/stream.css';
@@ -5,7 +6,7 @@ import TransferOperation from '../operations/TransferOperation';
 import QrPaymentOperation from '../operations/QrPaymentOperation';
 import DepositOperation from '../operations/DepositOperation';
 import HistoryOperation from '../operations/HistoryOperation';
-import BankDetailsOperation from '../operations/BankDetailsOperation'; // <-- Добавить этот импорт
+import BankDetailsOperation from '../operations/BankDetailsOperation';
 import { formatWithConversion, getCurrencySymbol } from '../utils/currencyConverter';
 
 interface StreamPageProps {
@@ -13,7 +14,6 @@ interface StreamPageProps {
   onCreateTransfer: (payload: TransferPayload) => Promise<string>;
 }
 
-// Добавляем 'bank-details' в тип операций
 type OperationType = 'transfer' | 'qr' | 'deposit' | 'history' | 'bank-details' | null;
 
 const StreamPage = ({ stream, onCreateTransfer }: StreamPageProps) => {
@@ -31,11 +31,9 @@ const StreamPage = ({ stream, onCreateTransfer }: StreamPageProps) => {
 
   const handleOperationClick = (tenantId: string, operation: OperationType) => {
     if (activeTenantId === tenantId && activeOperation === operation) {
-      // Закрыть операцию, если она уже открыта
       setActiveTenantId(null);
       setActiveOperation(null);
     } else {
-      // Открыть новую операцию
       setActiveTenantId(tenantId);
       setActiveOperation(operation);
     }
@@ -73,15 +71,16 @@ const StreamPage = ({ stream, onCreateTransfer }: StreamPageProps) => {
                 <h4>Кошельки:</h4>
                 <div className="wallet-grid">
                   {tenant.wallets.map((wallet) => {
-                    const formatted = formatWithConversion(wallet.balance, wallet.currency);
-                    const currencySymbol = getCurrencySymbol(wallet.currency);
+                    // ИСПРАВЛЯЕМ: wallet.currency -> wallet.currency_code
+                    const formatted = formatWithConversion(wallet.balance, wallet.currency_code);
+                    const currencySymbol = getCurrencySymbol(wallet.currency_code);
                     
                     return (
                       <div key={wallet.id} className="wallet-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <span style={{ fontSize: '18px' }}>{currencySymbol}</span>
                           <p className="wallet-card__label">
-                            {wallet.currency} кошелёк
+                            {wallet.currency_code} кошелёк {/* ИСПРАВЛЯЕМ */}
                             {formatted.isForeign && (
                               <span style={{
                                 fontSize: '10px',
@@ -116,6 +115,7 @@ const StreamPage = ({ stream, onCreateTransfer }: StreamPageProps) => {
                 </div>
               </div>
 
+              {/* Остальной код без изменений */}
               <div className="tenant-actions">
                 <h4>Операции:</h4>
                 <div className="actions-grid">
@@ -175,7 +175,6 @@ const StreamPage = ({ stream, onCreateTransfer }: StreamPageProps) => {
                 <HistoryOperation onClose={handleCloseOperation} />
               )}
 
-              {/* Добавляем новую операцию */}
               {activeTenantId === tenant.id && activeOperation === 'bank-details' && (
                 <BankDetailsOperation
                   tenantWallets={tenant.wallets}

@@ -1,53 +1,36 @@
-import type { ReactNode } from 'react';
+// AppLayout.tsx
 import FrameworkSidebar from '../components/FrameworkSidebar';
 import type { FrameworkUser, Stream } from '../types';
+import type { ReactNode } from 'react'; // Используем type import
 
 interface AppLayoutProps {
   user: FrameworkUser;
   streams: Stream[];
   onLogout: () => void;
-  children: ReactNode;
+  children: ReactNode; // children обязательно
 }
 
 const AppLayout = ({ user, streams, onLogout, children }: AppLayoutProps) => {
   return (
-    <div className="app-shell">
-      <FrameworkSidebar streams={streams} />
-
-      <div className="app-content">
-        <header className="app-header">
-          <div>
-            <p className="app-header__eyebrow">PayScan</p>
-            <h1>Система переводов и оплат</h1>
-            <p className="app-header__subtitle">
-              Управляйте кошельками на единой платформе
-            </p>
-          </div>
-          <div className="app-header__actions">
-            <div className="user-chip">
-              <div className="user-chip__avatar">
-                {user.name
-                  .split(' ')
-                  .map((x) => x[0])
-                  .join('')
-                  .slice(0, 2)}
-              </div>
-              <div>
-                <strong>{user.name}</strong>
-                <p>{user.email}</p>
-              </div>
-            </div>
-            <button className="ghost-button" onClick={onLogout}>
-              Выйти
-            </button>
-          </div>
-        </header>
-
-        <main className="app-main">{children}</main>
+    <div className="app-layout">
+      <header className="header">
+        <div className="header__logo">
+          <span>PayScan</span>
+        </div>
+        <div className="header__user">
+          <span>{user.name}</span>
+          <button onClick={onLogout}>Выйти</button>
+        </div>
+      </header>
+      
+      <div className="app-container">
+        <FrameworkSidebar streams={streams} />
+        <main className="main-content">
+          {children}
+        </main>
       </div>
     </div>
   );
 };
 
 export default AppLayout;
-

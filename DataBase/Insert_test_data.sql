@@ -11,25 +11,25 @@
 -- SET FOREIGN_KEY_CHECKS = 1;
 
 -- 1. Заполнение таблицы clients
-INSERT INTO clients (first_name, last_name, email, phone, date_of_birth, country, status) VALUES
-('Иван', 'Петров', 'ivan.petrov@email.com', '+79161234567', '1985-03-15', 'Россия', 'active'),
-('Мария', 'Сидорова', 'maria.sidorova@email.com', '+79162345678', '1990-07-22', 'Россия', 'active'),
-('Алексей', 'Козлов', 'alex.kozlov@email.com', '+79163456789', '1988-11-30', 'Россия', 'active'),
-('Елена', 'Николаева', 'elena.nikolaeva@email.com', '+79164567890', '1992-05-18', 'Россия', 'active'),
-('Дмитрий', 'Васильев', 'dmitry.vasiliev@email.com', '+79165678901', '1987-09-12', 'Россия', 'inactive'),
-('Ольга', 'Федорова', 'olga.fedorova@email.com', '+79166789012', '1995-01-25', 'Россия', 'active'),
-('Сергей', 'Морозов', 'sergey.morozov@email.com', '+79167890123', '1983-12-08', 'Россия', 'active'),
-('Анна', 'Павлова', 'anna.pavlova@email.com', '+79168901234', '1991-04-03', 'Россия', 'suspended'),
-('Павел', 'Семенов', 'pavel.semenov@email.com', '+79169012345', '1989-08-19', 'Россия', 'active'),
-('Юлия', 'Лебедева', 'yulia.lebedeva@email.com', '+79160123456', '1993-06-14', 'Россия', 'active');
+INSERT INTO clients (first_name, last_name, email, password_hash, phone, date_of_birth, country, status) VALUES
+('Иван', 'Петров', 'ivan.petrov@email.com', '1234', '+79161234567', '1985-03-15', 'Россия', 'active'),
+('Мария', 'Сидорова', 'maria.sidorova@email.com', '1234', '+79162345678', '1990-07-22', 'Россия', 'active'),
+('Алексей', 'Козлов', 'alex.kozlov@email.com', '1234', '+79163456789', '1988-11-30', 'Россия', 'active'),
+('Елена', 'Николаева', 'elena.nikolaeva@email.com', '1234', '+79164567890', '1992-05-18', 'Россия', 'active'),
+('Дмитрий', 'Васильев', 'dmitry.vasiliev@email.com','1234', '+79165678901', '1987-09-12', 'Россия', 'inactive'),
+('Ольга', 'Федорова', 'olga.fedorova@email.com', '1234', '+79166789012', '1995-01-25', 'Россия', 'active'),
+('Сергей', 'Морозов', 'sergey.morozov@email.com', '1234', '+79167890123', '1983-12-08', 'Россия', 'active'),
+('Анна', 'Павлова', 'anna.pavlova@email.com', '1234', '+79168901234', '1991-04-03', 'Россия', 'suspended'),
+('Павел', 'Семенов', 'pavel.semenov@email.com', '1234', '+79169012345', '1989-08-19', 'Россия', 'active'),
+('Юлия', 'Лебедева', 'yulia.lebedeva@email.com', '1234', '+79160123456', '1993-06-14', 'Россия', 'active');
 
 -- 2. Заполнение таблицы admins
 INSERT INTO admins (username, email, password_hash, first_name, last_name, role, permissions) VALUES
-('superadmin', 'admin@paymentsystem.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Андрей', 'Иванов', 'super_admin', '{"all_permissions": true}'),
-('admin1', 'admin1@paymentsystem.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Екатерина', 'Смирнова', 'admin', '{"transactions": true, "users": true, "reports": true}'),
-('moderator1', 'moderator1@paymentsystem.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Артем', 'Попов', 'moderator', '{"transactions": true, "users": false}'),
-('admin2', 'admin2@paymentsystem.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Наталья', 'Кузнецова', 'admin', '{"transactions": true, "users": true, "reports": false}'),
-('moderator2', 'moderator2@paymentsystem.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Роман', 'Соколов', 'moderator', '{"transactions": true}');
+('admin', 'admin@paymentsystem.com', '1234', 'Андрей', 'Иванов', 'super_admin', '{"all_permissions": true}'),
+('admin', 'admin1@paymentsystem.com', '1234', 'Екатерина', 'Смирнова', 'admin', '{"transactions": true, "users": true, "reports": true}'),
+('admin', 'moderator1@paymentsystem.com', '1234', 'Артем', 'Попов', 'moderator', '{"transactions": true, "users": false}'),
+('admin', 'admin2@paymentsystem.com', '1234', 'Наталья', 'Кузнецова', 'admin', '{"transactions": true, "users": true, "reports": false}'),
+('admin', 'moderator2@paymentsystem.com', '1234', 'Роман', 'Соколов', 'moderator', '{"transactions": true}');
 
 -- 3. Заполнение таблицы client_wallets
 INSERT INTO client_wallets (client_id, currency_code, balance, wallet_type) VALUES
@@ -63,34 +63,35 @@ INSERT INTO bank_accounts (account_number, bank_name, bank_country, account_type
 ('EXT_CLIENT_2', 'Raiffeisen Bank', 'Russia', 'EXTERNAL', 'RU05678901234567890123', 'RFBRRUMM', 0.00, 0.00, 200000.00),
 ('EXT_MERCHANT_US', 'JPMorgan Chase', 'USA', 'EXTERNAL', 'US02123456789012345678', 'CHASUS33', 0.00, 0.00, 500000.00);
 
--- 5. Заполнение таблицы transactions (ИСПРАВЛЕННЫЙ ВАРИАНТ)
+-- 5. Заполнение таблицы transactions (ПОЛНЫЙ НАБОР)
 INSERT INTO transactions (
-    transaction_uuid, from_wallet_id, to_wallet_id, from_bank_account_id, 
+    transaction_id, transaction_uuid, from_wallet_id, to_wallet_id, from_bank_account_id, 
     to_bank_account_id, amount, currency_code, fee_amount, 
     transaction_type, status, created_at
 ) VALUES
 -- Переводы между кошельками
-(UUID(), 1, 3, NULL, NULL, 100.00, 'USD', 1.00, 'WALLET_TRANSFER', 'completed', NOW()),
-(UUID(), 3, 5, NULL, NULL, 50.00, 'USD', 0.50, 'WALLET_TRANSFER', 'completed', NOW()),
-(UUID(), 6, 10, NULL, NULL, 200.00, 'USD', 2.00, 'WALLET_TRANSFER', 'pending', NOW()),
+(1, UUID(), 1, 3, NULL, NULL, 100.00, 'USD', 1.00, 'WALLET_TRANSFER', 'completed', NOW()),
+(2, UUID(), 3, 5, NULL, NULL, 50.00, 'USD', 0.50, 'WALLET_TRANSFER', 'completed', NOW()),
+(3, UUID(), 6, 10, NULL, NULL, 200.00, 'USD', 2.00, 'WALLET_TRANSFER', 'pending', NOW()),
 
 -- Пополнения кошельков
-(UUID(), NULL, 1, 8, NULL, 500.00, 'USD', 5.00, 'DEPOSIT', 'completed', NOW()),
-(UUID(), NULL, 2, 9, NULL, 300.00, 'EUR', 3.00, 'DEPOSIT', 'completed', NOW()),
-(UUID(), NULL, 4, 7, NULL, 10000.00, 'RUB', 100.00, 'DEPOSIT', 'completed', NOW()),
+(4, UUID(), NULL, 1, 8, NULL, 500.00, 'USD', 5.00, 'DEPOSIT', 'completed', NOW()),
+(5, UUID(), NULL, 2, 9, NULL, 300.00, 'EUR', 3.00, 'DEPOSIT', 'completed', NOW()),
+(6, UUID(), NULL, 4, 7, NULL, 10000.00, 'RUB', 100.00, 'DEPOSIT', 'completed', NOW()),
 
 -- Выводы с кошельков
-(UUID(), 1, NULL, NULL, 8, 200.00, 'USD', 2.00, 'WITHDRAWAL', 'completed', NOW()),
-(UUID(), 3, NULL, NULL, 9, 150.00, 'USD', 1.50, 'WITHDRAWAL', 'pending', NOW()),
+(7, UUID(), 1, NULL, NULL, 8, 200.00, 'USD', 2.00, 'WITHDRAWAL', 'completed', NOW()),
+(8, UUID(), 3, NULL, NULL, 9, 150.00, 'USD', 1.50, 'WITHDRAWAL', 'pending', NOW()),
 
 -- Оплаты покупок
-(UUID(), 1, NULL, 1, 5, 75.00, 'USD', 0.75, 'PAYMENT', 'completed', NOW()),
-(UUID(), 3, NULL, 1, 6, 120.00, 'USD', 1.20, 'PAYMENT', 'completed', NOW()),
-(UUID(), 6, NULL, 1, 10, 89.99, 'USD', 0.90, 'PAYMENT', 'completed', NOW()),
+(9, UUID(), 1, NULL, NULL, 5, 75.00, 'USD', 0.75, 'PAYMENT', 'completed', NOW()),
+(10, UUID(), 3, NULL, NULL, 6, 120.00, 'USD', 1.20, 'PAYMENT', 'completed', NOW()),
+(11, UUID(), 6, NULL, NULL, 10, 89.99, 'USD', 0.90, 'PAYMENT', 'completed', NOW()),
 
 -- Переводы между счетами
-(UUID(), NULL, NULL, 1, 2, 10000.00, 'USD', 0.00, 'ACCOUNT_TRANSFER', 'completed', NOW()),
-(UUID(), NULL, NULL, 2, 3, 5000.00, 'EUR', 0.00, 'ACCOUNT_TRANSFER', 'pending', NOW());
+(12, UUID(), NULL, NULL, 4, NULL, 15.45, 'USD', 0.00, 'SYSTEM_FEE', 'completed', NOW()), -- Системная комиссия
+(13, UUID(), NULL, NULL, 1, 2, 10000.00, 'USD', 0.00, 'ACCOUNT_TRANSFER', 'completed', NOW()),
+(14, UUID(), NULL, NULL, 2, 3, 5000.00, 'EUR', 0.00, 'ACCOUNT_TRANSFER', 'pending', NOW());
 
 -- 6. Заполнение таблицы transaction_approvals
 INSERT INTO transaction_approvals (transaction_id, admin_id, action, notes) VALUES

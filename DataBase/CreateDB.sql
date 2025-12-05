@@ -12,16 +12,13 @@ CREATE TABLE clients (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     phone VARCHAR(50),
     date_of_birth DATE,
     country VARCHAR(100) NOT NULL,
     status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_email (email),
-    INDEX idx_status (status),
-    INDEX idx_country (country)
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Таблица кошельков клиентов
@@ -37,10 +34,6 @@ CREATE TABLE client_wallets (
     
     FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE,
     UNIQUE KEY unique_client_currency (client_id, currency_code),
-    
-    INDEX idx_client_id (client_id),
-    INDEX idx_currency (currency_code),
-    INDEX idx_is_active (is_active),
     CHECK (balance >= 0)
 );
 
@@ -58,18 +51,13 @@ CREATE TABLE bank_accounts (
     max_balance DECIMAL(15,2) DEFAULT 1000000.00,
     is_active TINYINT(1) DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_account_number (account_number),
-    INDEX idx_account_type (account_type),
-    INDEX idx_bank_country (bank_country),
-    INDEX idx_is_active (is_active)
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Таблица администраторов
 CREATE TABLE admins (
     admin_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) UNIQUE NOT NULL,
+    username VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
@@ -79,12 +67,7 @@ CREATE TABLE admins (
     is_active TINYINT(1) DEFAULT TRUE,
     last_login DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_username (username),
-    INDEX idx_email (email),
-    INDEX idx_role (role),
-    INDEX idx_is_active (is_active)
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Таблица транзакций
@@ -114,21 +97,7 @@ CREATE TABLE transactions (
     FOREIGN KEY (from_wallet_id) REFERENCES client_wallets(wallet_id),
     FOREIGN KEY (to_wallet_id) REFERENCES client_wallets(wallet_id),
     FOREIGN KEY (from_bank_account_id) REFERENCES bank_accounts(account_id),
-    FOREIGN KEY (to_bank_account_id) REFERENCES bank_accounts(account_id),
-    
-    CONSTRAINT chk_wallet_or_account CHECK (
-        (from_wallet_id IS NOT NULL OR from_bank_account_id IS NOT NULL) AND
-        (to_wallet_id IS NOT NULL OR to_bank_account_id IS NOT NULL)
-    ),
-    
-    INDEX idx_transaction_uuid (transaction_uuid),
-    INDEX idx_from_wallet (from_wallet_id),
-    INDEX idx_to_wallet (to_wallet_id),
-    INDEX idx_from_account (from_bank_account_id),
-    INDEX idx_to_account (to_bank_account_id),
-    INDEX idx_type_status (transaction_type, status),
-    INDEX idx_created_at (created_at),
-    INDEX idx_currency (currency_code)
+    FOREIGN KEY (to_bank_account_id) REFERENCES bank_accounts(account_id)
 );
 
 -- Таблица для отслеживания подтверждений администраторов
@@ -141,9 +110,5 @@ CREATE TABLE transaction_approvals (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id) ON DELETE CASCADE,
-    FOREIGN KEY (admin_id) REFERENCES admins(admin_id),
-    
-    INDEX idx_transaction_id (transaction_id),
-    INDEX idx_admin_id (admin_id),
-    INDEX idx_created_at (created_at)
+    FOREIGN KEY (admin_id) REFERENCES admins(admin_id)
 );

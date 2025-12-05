@@ -1,7 +1,14 @@
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+// Получаем текущую директорию ES модулей
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Загружаем .env из корневой директории проекта
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',

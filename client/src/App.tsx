@@ -1,5 +1,6 @@
+// App.tsx - полный исправленный код
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import './styles/global.css';
 import './styles/components.css';
 import './styles/pages/auth.css';
@@ -31,6 +32,7 @@ function App() {
   const [user, setUser] = useState<FrameworkUser | null>(null);
   const [streams, setStreams] = useState<Stream[]>(mockFrameworkUser.streams);
   const [authError, setAuthError] = useState<string | undefined>();
+  const navigate = useNavigate();
 
   const handleLogin = async (email: string, password: string) => {
     setAuthError(undefined);
@@ -38,11 +40,14 @@ function App() {
       const logged = await login(email, password);
       setUser(logged);
       setStreams(logged.streams);
+      navigate('/');
     } catch (error) {
-      console.error(error);
-      setUser({ ...mockFrameworkUser, email });
-      setStreams(mockFrameworkUser.streams);
-      setAuthError('Работаем в офлайн-режиме. Данные тестовые.');
+      console.error('Login error:', error);
+      if (error instanceof Error) {
+        setAuthError(error.message || 'Ошибка авторизации');
+      } else {
+        setAuthError('Не удалось подключиться к серверу');
+      }
     }
   };
 
@@ -57,6 +62,7 @@ function App() {
 
   const handleLogout = () => {
     setUser(null);
+    navigate('/');
   };
 
   const handleTransfer = async (payload: TransferPayload) => {
@@ -69,21 +75,28 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <AppLayout user={user} streams={streams} onLogout={handleLogout}>
-        <Routes>
-          <Route path="/" element={<DashboardPage streams={streams} />} />
-          <Route
-            path="/streams/:streamId"
-            element={
-              <StreamRoute streams={streams} onCreateTransfer={handleTransfer} />
-            }
-          />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </AppLayout>
-    </BrowserRouter>
+    <AppLayout user={user} streams={streams} onLogout={handleLogout}>
+      <Routes>
+        <Route path="/" element={<DashboardPage streams={streams} />} />
+        <Route
+          path="/streams/:streamId"
+          element={
+            <StreamRoute 
+              streams={streams} 
+              onCreateTransfer={handleTransfer} 
+            />
+          }
+        />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </AppLayout>
   );
 }
 
-export default App;
+export default function AppWrapper() {
+  return (
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  );
+}

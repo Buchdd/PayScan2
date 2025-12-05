@@ -1,3 +1,4 @@
+// DashboardPage.tsx - исправляем wallet.currency на wallet.currency_code
 import { Link } from 'react-router-dom';
 import type { Stream, Wallet } from '../types';
 import UserProfile, { type UserProfileData } from '../components/UserProfile';
@@ -14,7 +15,6 @@ interface WalletWithContext extends Wallet {
   tenantTitle: string; 
 }
 
-// Пример данных пользователя
 const mockUserData: UserProfileData = {
   fullName: 'Иванов Иван Иванович',
   phone: '+7 (999) 123-45-67',
@@ -29,7 +29,6 @@ const mockUserData: UserProfileData = {
 };
 
 const DashboardPage = ({ streams }: DashboardPageProps) => {
-  // Собираем все кошельки со всех стримов
   const allWallets: WalletWithContext[] = streams.flatMap((stream) =>
     stream.tenants.flatMap((tenant) =>
       tenant.wallets.map((wallet) => ({
@@ -64,7 +63,6 @@ const DashboardPage = ({ streams }: DashboardPageProps) => {
         </div>
       </div>
 
-      {/* Профиль пользователя с возможностью сворачивания */}
       <UserProfile
         user={mockUserData}
         onVerificationRequest={handleVerificationRequest}
@@ -80,8 +78,9 @@ const DashboardPage = ({ streams }: DashboardPageProps) => {
         ) : (
           <div className="wallet-list">
             {allWallets.map((wallet) => {
-              const formatted = formatWithConversion(wallet.balance, wallet.currency);
-              const currencySymbol = getCurrencySymbol(wallet.currency);
+              // ИСПРАВЛЯЕМ: wallet.currency -> wallet.currency_code
+              const formatted = formatWithConversion(wallet.balance, wallet.currency_code);
+              const currencySymbol = getCurrencySymbol(wallet.currency_code);
               
               return (
                 <Link
@@ -93,7 +92,7 @@ const DashboardPage = ({ streams }: DashboardPageProps) => {
                     <div className="wallet-item__header">
                       <h3>
                         <span style={{ marginRight: '8px' }}>{currencySymbol}</span>
-                        {wallet.currency} кошелёк
+                        {wallet.currency_code} кошелёк {/* ИСПРАВЛЯЕМ */}
                         {formatted.isForeign && (
                           <span style={{
                             fontSize: '12px',
@@ -127,7 +126,7 @@ const DashboardPage = ({ streams }: DashboardPageProps) => {
                       </p>
                     )}
                     <p className="wallet-item__currency">
-                      Баланс в {wallet.currency}
+                      Баланс в {wallet.currency_code} {/* ИСПРАВЛЯЕМ */}
                     </p>
                   </div>
                 </Link>
