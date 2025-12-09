@@ -92,3 +92,28 @@
   }
 }
 
+/* Добавьте в global.css, если этих классов нет */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-container {
+  display: flex;
+  flex: 1;
+}
+
+.main-content {
+  flex: 1;
+  padding: 32px;
+  background: #f8fafc;
+  overflow-y: auto;
+}
+
+/* Адаптивность для main-content */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 20px;
+  }
+}

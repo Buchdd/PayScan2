@@ -22,7 +22,7 @@ const StreamRoute = ({
 }) => {
   const { streamId } = useParams();
   const stream = streams.find((item) => item.id === streamId);
-  if (!stream) {
+  if (!stream || !stream.tenants) {
     return <NotFoundPage />;
   }
   return <StreamPage stream={stream} onCreateTransfer={onCreateTransfer} />;

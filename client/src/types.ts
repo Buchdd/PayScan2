@@ -50,6 +50,11 @@ export interface FrameworkUser {
   country: string;
   status: string;
   streams: Stream[];
+  // Добавляем опциональные поля для полноты
+  date_of_birth?: string;
+  created_at?: string;
+  first_name?: string;
+  last_name?: string;
 }
 
 export interface TransferPayload {

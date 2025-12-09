@@ -1,20 +1,17 @@
+// UserProfile.tsx - исправленная версия
 import React, { useState } from 'react';
+import type { FrameworkUser } from '../types';
+import '../styles/user-profile.css';
 
-export interface UserProfileData {
-  fullName: string;
-  phone: string;
-  email: string;
+interface UserProfileProps {
+  user: FrameworkUser;
   passportData?: {
     series: string;
     number: string;
     issuedBy: string;
     issueDate: string;
   };
-  verificationStatus: 'verified' | 'pending' | 'not_verified' | 'rejected';
-}
-
-interface UserProfileProps {
-  user: UserProfileData;
+  verificationStatus?: 'verified' | 'pending' | 'not_verified' | 'rejected';
   onVerificationRequest?: () => void;
   onEditProfile?: () => void;
   defaultCollapsed?: boolean;
@@ -22,13 +19,15 @@ interface UserProfileProps {
 
 const UserProfile: React.FC<UserProfileProps> = ({
   user,
+  passportData,
+  verificationStatus = 'not_verified',
   onVerificationRequest,
   onEditProfile,
   defaultCollapsed = false,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
-  const getStatusText = (status: UserProfileData['verificationStatus']) => {
+  const getStatusText = (status: UserProfileProps['verificationStatus']) => {
     switch (status) {
       case 'verified':
         return 'Верифицирован';
@@ -43,40 +42,103 @@ const UserProfile: React.FC<UserProfileProps> = ({
     }
   };
 
-  const getStatusColor = (status: UserProfileData['verificationStatus']) => {
+  const getStatusClass = (status: UserProfileProps['verificationStatus']) => {
     switch (status) {
       case 'verified':
-        return '#10b981'; // success
+        return 'user-profile__status--verified';
       case 'pending':
-        return '#f59e0b'; // warning
+        return 'user-profile__status--pending';
       case 'not_verified':
-        return '#64748b'; // gray
+        return 'user-profile__status--not_verified';
       case 'rejected':
-        return '#ef4444'; // error
+        return 'user-profile__status--rejected';
+      default:
+        return 'user-profile__status--not_verified';
+    }
+  };
+
+  // Форматируем дату (если есть в user)
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Не указана';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return dateString;
+      }
+      return date.toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Безопасное получение статуса с дефолтным значением
+  const getUserStatus = () => {
+    return user?.status || 'active'; // По умолчанию "active"
+  };
+
+  const getClientStatusText = (status: string) => {
+    const statusLower = status?.toLowerCase() || 'active';
+    switch (statusLower) {
+      case 'active':
+      case 'активен':
+        return 'Активен';
+      case 'inactive':
+      case 'неактивен':
+        return 'Неактивен';
+      case 'suspended':
+      case 'приостановлен':
+        return 'Приостановлен';
+      default:
+        return status || 'Активен';
+    }
+  };
+
+  const getClientStatusColor = (status: string) => {
+    const statusLower = status?.toLowerCase() || 'active';
+    switch (statusLower) {
+      case 'active':
+      case 'активен':
+        return '#10b981';
+      case 'inactive':
+      case 'неактивен':
+        return '#64748b';
+      case 'suspended':
+      case 'приостановлен':
+        return '#ef4444';
       default:
         return '#64748b';
     }
   };
 
+  // Если нужно получить полное имя
+  const fullName = user?.full_name || user?.name || 'Не указано';
+  const email = user?.email || 'Не указан';
+  const phone = user?.phone || 'Не указан';
+  const country = user?.country || 'Не указана';
+  const userStatus = getUserStatus();
+
+  // Если user undefined, показываем заглушку
+  if (!user) {
+    return (
+      <div className="card user-profile">
+        <div className="user-profile__warning user-profile__warning--pending">
+          <p style={{ margin: 0 }}>Данные пользователя загружаются...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="card">
-      <div className="card__header">
+    <div className="card user-profile">
+      <div className="card__header user-profile__header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="button button--small"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              padding: '4px',
-              cursor: 'pointer',
-              minWidth: '24px',
-              minHeight: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '4px',
-            }}
+            className="user-profile__collapse-btn"
             aria-label={isCollapsed ? 'Развернуть профиль' : 'Свернуть профиль'}
           >
             <svg
@@ -85,10 +147,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
               viewBox="0 0 16 16"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              style={{
-                transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s ease',
-              }}
+              className={`user-profile__collapse-icon ${!isCollapsed ? 'expanded' : ''}`}
             >
               <path
                 d="M4 6L8 10L12 6"
@@ -99,9 +158,9 @@ const UserProfile: React.FC<UserProfileProps> = ({
               />
             </svg>
           </button>
-          <div>
-            <p className="card__eyebrow">Профиль пользователя</p>
-            <h3 style={{ margin: 0 }}>Личная информация</h3>
+          <div className="user-profile__title">
+            <p className="card__eyebrow">Профиль клиента</p>
+            <h3>Личная информация</h3>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -113,72 +172,76 @@ const UserProfile: React.FC<UserProfileProps> = ({
               Редактировать
             </button>
           )}
+          <span className={`user-profile__status ${getStatusClass(verificationStatus)}`}>
+            {getStatusText(verificationStatus)}
+          </span>
           <span style={{
-            padding: '4px 12px',
-            borderRadius: '999px',
-            fontSize: '12px',
-            fontWeight: '600',
-            backgroundColor: getStatusColor(user.verificationStatus) + '20',
-            color: getStatusColor(user.verificationStatus),
-            border: `1px solid ${getStatusColor(user.verificationStatus)}`,
-            whiteSpace: 'nowrap'
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '11px',
+            fontWeight: '500',
+            backgroundColor: getClientStatusColor(userStatus) + '20',
+            color: getClientStatusColor(userStatus),
           }}>
-            {getStatusText(user.verificationStatus)}
+            {getClientStatusText(userStatus)}
           </span>
         </div>
       </div>
 
       {!isCollapsed && (
-        <div style={{ 
-          display: 'grid', 
-          gap: '24px',
-          gridTemplateColumns: '1fr',
-          marginTop: '16px'
-        }}>
-          {/* Основная информация */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="user-profile__content">
+          <div className="user-profile__fields">
+            {/* Основная информация */}
             <div className="form-field">
               <span>ФИО</span>
-              <div style={{ 
-                padding: '10px 12px', 
-                backgroundColor: '#f8fafc', 
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
-                {user.fullName}
-              </div>
-            </div>
-
-            <div className="form-field">
-              <span>Телефон</span>
-              <div style={{ 
-                padding: '10px 12px', 
-                backgroundColor: '#f8fafc', 
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
-                {user.phone}
+              <div className="user-profile__field-value">
+                {fullName}
               </div>
             </div>
 
             <div className="form-field">
               <span>Email</span>
-              <div style={{ 
-                padding: '10px 12px', 
-                backgroundColor: '#f8fafc', 
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0'
-              }}>
-                {user.email}
+              <div className="user-profile__field-value">
+                {email}
               </div>
             </div>
+
+            <div className="form-field">
+              <span>Телефон</span>
+              <div className="user-profile__field-value">
+                {phone}
+              </div>
+            </div>
+
+            <div className="form-field">
+              <span>Страна</span>
+              <div className="user-profile__field-value">
+                {country}
+              </div>
+            </div>
+
+            {/* Опциональные поля - показываем только если есть данные */}
+            {'date_of_birth' in user && user.date_of_birth && (
+              <div className="form-field">
+                <span>Дата рождения</span>
+                <div className="user-profile__field-value">
+                  {formatDate(user.date_of_birth)}
+                </div>
+              </div>
+            )}
+
+            {'created_at' in user && user.created_at && (
+              <div className="form-field">
+                <span>Дата регистрации</span>
+                <div className="user-profile__field-value">
+                  {formatDate(user.created_at)}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Верификация и паспортные данные */}
-          <div style={{ 
-            borderTop: '1px solid #e2e8f0', 
-            paddingTop: '24px'
-          }}>
+          <div className="user-profile__passport-section">
             <div style={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
@@ -188,66 +251,40 @@ const UserProfile: React.FC<UserProfileProps> = ({
               <h4 style={{ margin: 0 }}>Паспортные данные</h4>
             </div>
 
-            {user.passportData ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            {passportData ? (
+              <div className="user-profile__fields">
+                <div className="user-profile__passport-grid">
                   <div className="form-field">
                     <span>Серия паспорта</span>
-                    <div style={{ 
-                      padding: '10px 12px', 
-                      backgroundColor: '#f8fafc', 
-                      borderRadius: '12px',
-                      border: '1px solid #e2e8f0'
-                    }}>
-                      {user.passportData.series}
+                    <div className="user-profile__field-value">
+                      {passportData.series}
                     </div>
                   </div>
 
                   <div className="form-field">
                     <span>Номер паспорта</span>
-                    <div style={{ 
-                      padding: '10px 12px', 
-                      backgroundColor: '#f8fafc', 
-                      borderRadius: '12px',
-                      border: '1px solid #e2e8f0'
-                    }}>
-                      {user.passportData.number}
+                    <div className="user-profile__field-value">
+                      {passportData.number}
                     </div>
                   </div>
                 </div>
 
                 <div className="form-field">
                   <span>Кем выдан</span>
-                  <div style={{ 
-                    padding: '10px 12px', 
-                    backgroundColor: '#f8fafc', 
-                    borderRadius: '12px',
-                    border: '1px solid #e2e8f0'
-                  }}>
-                    {user.passportData.issuedBy}
+                  <div className="user-profile__field-value">
+                    {passportData.issuedBy}
                   </div>
                 </div>
 
                 <div className="form-field">
                   <span>Дата выдачи</span>
-                  <div style={{ 
-                    padding: '10px 12px', 
-                    backgroundColor: '#f8fafc', 
-                    borderRadius: '12px',
-                    border: '1px solid #e2e8f0'
-                  }}>
-                    {user.passportData.issueDate}
+                  <div className="user-profile__field-value">
+                    {passportData.issueDate}
                   </div>
                 </div>
               </div>
             ) : (
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '32px',
-                backgroundColor: '#f8fafc',
-                borderRadius: '12px',
-                border: '1px dashed #e2e8f0'
-              }}>
+              <div className="user-profile__passport-empty">
                 <p style={{ margin: '0 0 8px 0', color: '#64748b' }}>
                   Паспортные данные не предоставлены
                 </p>
@@ -262,12 +299,8 @@ const UserProfile: React.FC<UserProfileProps> = ({
             )}
 
             {/* Действия по верификации */}
-            {user.verificationStatus === 'not_verified' && onVerificationRequest && (
-              <div style={{ 
-                marginTop: '24px', 
-                paddingTop: '20px',
-                borderTop: '1px solid #e2e8f0'
-              }}>
+            {verificationStatus === 'not_verified' && onVerificationRequest && (
+              <div className="user-profile__verification-actions">
                 <button 
                   className="primary-button" 
                   onClick={onVerificationRequest}
@@ -278,18 +311,10 @@ const UserProfile: React.FC<UserProfileProps> = ({
               </div>
             )}
 
-            {user.verificationStatus === 'rejected' && (
-              <div style={{ 
-                marginTop: '20px',
-                padding: '16px',
-                backgroundColor: '#fee2e220',
-                borderRadius: '12px',
-                border: '1px solid #fecaca'
-              }}>
+            {verificationStatus === 'rejected' && (
+              <div className="user-profile__warning user-profile__warning--rejected">
                 <p style={{ 
-                  margin: '0 0 12px 0', 
-                  color: '#991b1b',
-                  fontSize: '14px'
+                  margin: '0 0 12px 0'
                 }}>
                   В верификации отказано. Пожалуйста, проверьте корректность данных и попробуйте снова.
                 </p>
@@ -305,19 +330,9 @@ const UserProfile: React.FC<UserProfileProps> = ({
               </div>
             )}
 
-            {user.verificationStatus === 'pending' && (
-              <div style={{ 
-                marginTop: '20px',
-                padding: '16px',
-                backgroundColor: '#fef3c720',
-                borderRadius: '12px',
-                border: '1px solid #fde68a'
-              }}>
-                <p style={{ 
-                  margin: 0, 
-                  color: '#92400e',
-                  fontSize: '14px'
-                }}>
+            {verificationStatus === 'pending' && (
+              <div className="user-profile__warning user-profile__warning--pending">
+                <p style={{ margin: 0 }}>
                   Ваши данные находятся на проверке. Обычно это занимает 1-3 рабочих дня.
                 </p>
               </div>
@@ -327,24 +342,20 @@ const UserProfile: React.FC<UserProfileProps> = ({
       )}
 
       {isCollapsed && (
-        <div style={{ 
-          marginTop: '16px',
-          padding: '12px',
-          backgroundColor: '#f8fafc',
-          borderRadius: '8px',
-          border: '1px solid #e2e8f0',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          fontSize: '14px',
-          color: '#64748b'
-        }}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div className="user-profile__collapsed">
+          <svg 
+            width="16" 
+            height="16" 
+            viewBox="0 0 16 16" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            className="user-profile__collapsed-icon"
+          >
             <path d="M8 8C9.10457 8 10 7.10457 10 6C10 4.89543 9.10457 4 8 4C6.89543 4 6 4.89543 6 6C6 7.10457 6.89543 8 8 8Z" fill="#64748b"/>
             <path d="M8 9C6.67392 9 5.40215 9.52678 4.46447 10.4645C3.52678 11.4021 3 12.6739 3 14H13C13 12.6739 12.4732 11.4021 11.5355 10.4645C10.5979 9.52678 9.32608 9 8 9Z" fill="#64748b"/>
           </svg>
           <span>
-            {user.fullName} • {user.phone} • {user.email}
+            {fullName} • {phone} • {email}
           </span>
         </div>
       )}
